@@ -3,468 +3,693 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - BelanjaDulu</title>
-    
-    <!-- Memuat Font Poppins dari Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Memuat Tailwind CSS melalui CDN -->
+    <title>BELANJADULU - Toko Online Modern</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Konfigurasi Tailwind untuk tema warna khusus -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    colors: {
-                        primary: '#10b981', // Emerald 500 (Hijau Utama)
-                        primaryDark: '#047857', // Emerald 700 (Hijau Tua)
-                        primaryLight: '#34d399', // Emerald 400 (Hijau Muda)
-                        error: '#ef4444' // Red 500
-                    },
                     fontFamily: {
-                        sans: ['Poppins', 'sans-serif']
+                        sans: ['Inter', 'sans-serif'],
                     },
-                    animation: {
-                        'slide-up': 'slideUp 0.5s ease-out',
-                        'fade-in': 'fadeIn 0.3s ease-in-out',
-                        'slide-down': 'slideDown 0.4s ease-out forwards'
-                    },
-                    keyframes: {
-                        slideUp: {
-                            '0%': { opacity: '0', transform: 'translateY(20px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' }
-                        },
-                        fadeIn: {
-                            '0%': { opacity: '0' },
-                            '100%': { opacity: '1' }
-                        },
-                        slideDown: {
-                            '0%': { opacity: '0', transform: 'translateY(-50px) translateX(-50%)' },
-                            '100%': { opacity: '1', transform: 'translateY(0) translateX(-50%)' }
-                        }
+                    colors: {
+                        main: '#16A34A',
+                        dark: '#15803D',
+                        darker: '#14532D',
+                        light: '#DCFCE7',
+                        bgapp: '#F0FDF4',
+                        textmain: '#1F2937'
                     }
                 }
             }
         }
     </script>
-
     <style>
-        /* Styling tambahan untuk hal yang spesifik */
-        body {
-            font-family: 'Poppins', sans-serif;
-            /* Latar belakang gradient hijau halus */
-            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
-            min-height: 100vh;
+        body { font-family: 'Inter', sans-serif; }
+        .captcha-box { user-select: none; letter-spacing: 4px; }
+        /* Transisi halus untuk gambar produk */
+        .product-card img {
+            transition: transform 0.3s ease;
         }
-        
-        /* Menyembunyikan elemen secara visual namun tetap ada di DOM untuk animasi */
-        .view-hidden {
-            display: none;
-        }
-        
-        .input-error {
-            border-color: #ef4444 !important;
-            box-shadow: 0 0 0 1px #ef4444 !important;
+        .product-card:hover img {
+            transform: scale(1.05);
         }
     </style>
 </head>
-<body class="flex items-center justify-center p-4">
+<body class="bg-bgapp text-textmain min-h-screen">
 
-    <!-- Notifikasi Kustom (Pengganti Alert) -->
-    <div id="notificationBox" class="fixed top-6 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-lg shadow-lg text-white font-medium z-50 view-hidden transition-all">
-        <div class="flex items-center gap-2">
-            <span id="notifIcon"></span>
-            <span id="notifMessage">Pesan Notifikasi</span>
+    <div id="messageModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl transform scale-95 transition-transform duration-300" id="messageModalContent">
+            <div class="text-center">
+                <div id="modalIcon" class="mx-auto flex items-center justify-center h-12 w-12 rounded-full mb-4">
+                    <!-- Icon disisipkan via JS -->
+                </div>
+                <h3 id="modalTitle" class="text-lg font-bold text-gray-900 mb-2">Pesan</h3>
+                <p id="modalText" class="text-sm text-gray-500 mb-6">Deskripsi pesan di sini.</p>
+                <button onclick="closeModal()" class="w-full bg-main hover:bg-dark text-white font-semibold py-2 px-4 rounded-xl transition duration-200">
+                    Mengerti
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- Kontainer Utama Card -->
-    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-8 relative overflow-hidden animate-slide-up border border-gray-100">
-        
-        <!-- Ornamen Dekoratif di pojok -->
-        <div class="absolute -top-10 -right-10 w-32 h-32 bg-primaryLight opacity-20 rounded-full blur-2xl"></div>
-        <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-primary opacity-20 rounded-full blur-2xl"></div>
-
-        <!-- Header & Logo -->
-        <div class="text-center mb-8 relative z-10">
-            <div class="inline-flex items-center justify-center w-14 h-14 bg-green-50 rounded-full text-primary mb-3 shadow-inner">
-                <!-- Ikon Tas Belanja (SVG) -->
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                </svg>
+    <div id="loginView" class="min-h-screen flex items-center justify-center p-4">
+        <div class="max-w-md w-full bg-white rounded-3xl shadow-xl overflow-hidden">
+            <div class="bg-gradient-to-r from-main to-dark p-8 text-center">
+                <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg">
+                    <i class="fa-solid fa-bag-shopping text-3xl text-main"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-white tracking-wide">BELANJADULU</h1>
+                <p class="text-light text-sm mt-1">Masuk untuk mulai berbelanja</p>
             </div>
-            <h1 class="text-2xl font-bold text-gray-800 tracking-tight">BELANJA<span class="text-primary">DULU</span></h1>
-            <p class="text-sm text-gray-500 mt-1" id="subtitleText">Silakan masuk ke akun Anda</p>
+
+            <div class="p-8">
+                <form id="loginForm" class="space-y-5">
+                    <!-- Input NIS -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">NIS / NIK</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-user text-gray-400"></i>
+                            </div>
+                            <input type="text" id="nisInput" placeholder="Masukkan NIS Anda (25000016)" 
+                                class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-main focus:border-main outline-none transition" required>
+                        </div>
+                    </div>
+
+                    <!-- Input Password -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-lock text-gray-400"></i>
+                            </div>
+                            <input type="password" id="passwordInput" placeholder="Masukkan Password (123456)" 
+                                class="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-main focus:border-main outline-none transition" required>
+                            <button type="button" onclick="togglePassword()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-main">
+                                <i id="eyeIcon" class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- CAPTCHA Section -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Kode Keamanan</label>
+                        <div class="flex items-center space-x-3 mb-2">
+                            <div id="captchaDisplay" class="captcha-box bg-gray-100 flex-1 text-center py-2 rounded-xl text-lg font-bold text-darker border-2 border-dashed border-gray-300 italic line-through">
+                                A7K9P
+                            </div>
+                            <button type="button" onclick="generateCaptcha()" class="p-3 bg-light text-main hover:bg-main hover:text-white rounded-xl transition shadow-sm">
+                                <i class="fa-solid fa-arrows-rotate"></i>
+                            </button>
+                        </div>
+                        <input type="text" id="captchaInput" placeholder="Masukkan kode di atas" 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-main focus:border-main outline-none transition uppercase" required>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="w-full bg-gradient-to-r from-main to-dark hover:from-dark hover:to-darker text-white font-bold py-3 px-4 rounded-xl shadow-lg transform transition active:scale-95">
+                        MASUK
+                    </button>
+                </form>
+
+                <div class="mt-6 flex items-center justify-between text-sm">
+                    <a href="#" class="text-main hover:text-dark font-medium transition">Daftar Akun</a>
+                    <a href="#" class="text-gray-500 hover:text-main transition">Lupa Password?</a>
+                </div>
+            </div>
         </div>
+    </div>
 
-        <!-- VIEW: LOGIN -->
-        <div id="loginView" class="relative z-10 animate-fade-in">
-            <form id="loginForm" novalidate>
-                <!-- Input NISN / NIK -->
-                <div class="mb-5">
-                    <label for="nikInput" class="block text-sm font-semibold text-gray-700 mb-1">NISN / NIK</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
-                            </svg>
+    <div id="shopView" class="hidden">
+        <!-- Navbar -->
+        <nav class="bg-white shadow-md sticky top-0 z-40 border-b border-gray-100">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16 items-center">
+                    <!-- Brand -->
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-gradient-to-tr from-main to-dark rounded-xl flex items-center justify-center text-white shadow-md">
+                            <i class="fa-solid fa-bag-shopping text-lg"></i>
                         </div>
-                        <input type="text" id="nikInput" required placeholder="Masukkan NISN atau NIK" 
-                               class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-gray-700">
+                        <span class="text-xl font-bold bg-gradient-to-r from-main to-darker bg-clip-text text-transparent tracking-tight">BELANJADULU</span>
                     </div>
-                    <p class="text-xs text-error mt-1 hidden" id="nikError">NISN / NIK wajib diisi.</p>
-                </div>
 
-                <!-- Input Password -->
-                <div class="mb-5">
-                    <label for="passwordInput" class="block text-sm font-semibold text-gray-700 mb-1">Password</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                            </svg>
+                    <!-- Search Bar (Desktop) -->
+                    <div class="hidden md:flex flex-1 max-w-md mx-8">
+                        <div class="relative w-full">
+                            <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="Cari barang yang kamu inginkan..." 
+                                class="w-full bg-gray-50 border border-gray-200 rounded-full py-2 pl-4 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-main focus:bg-white transition">
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-400">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                            </div>
                         </div>
-                        <input type="password" id="passwordInput" required placeholder="Masukkan password" 
-                               class="w-full pl-10 pr-12 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-gray-700">
-                        <!-- Toggle Password -->
-                        <button type="button" id="togglePassword" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-primary transition-colors focus:outline-none">
-                            <svg id="eyeIcon" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                            </svg>
+                    </div>
+
+                    <!-- Navigation Items & Cart -->
+                    <div class="flex items-center space-x-4">
+                        <button onclick="toggleCartDrawer()" class="relative p-2 text-gray-600 hover:text-main transition focus:outline-none">
+                            <i class="fa-solid fa-cart-shopping text-xl"></i>
+                            <span id="cartBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold hidden">0</span>
+                        </button>
+                        <div class="hidden sm:flex items-center space-x-2 border-l pl-4 border-gray-200">
+                            <div class="w-8 h-8 rounded-full bg-light text-main flex items-center justify-center font-bold text-sm">
+                                <i class="fa-solid fa-user"></i>
+                            </div>
+                            <span class="text-sm font-medium text-gray-700">Akun Siswa</span>
+                        </div>
+                        <button onclick="logout()" class="flex items-center space-x-1 px-3 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-xl transition text-sm font-semibold">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                            <span class="hidden sm:inline">Logout</span>
                         </button>
                     </div>
-                    <p class="text-xs text-error mt-1 hidden" id="passwordError">Password wajib diisi.</p>
                 </div>
-
-                <!-- Kode CAPTCHA -->
-                <div class="mb-6">
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Verifikasi Keamanan</label>
-                    <div class="flex items-center gap-3 mb-2">
-                        <!-- Canvas untuk menggambar CAPTCHA secara dinamis -->
-                        <div class="bg-gray-100 p-1 border border-gray-300 rounded-lg flex-1 text-center relative overflow-hidden">
-                            <canvas id="captchaCanvas" width="120" height="40" class="mx-auto"></canvas>
-                        </div>
-                        <button type="button" id="refreshCaptchaBtn" class="p-2.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg border border-gray-300 transition-colors focus:outline-none" title="Refresh CAPTCHA">
-                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                            </svg>
-                        </button>
+            </div>
+            <!-- Search bar mobile version -->
+            <div class="p-3 bg-gray-50 border-t border-gray-100 md:hidden">
+                <div class="relative w-full">
+                    <input type="text" oninput="handleSearch(this.value)" placeholder="Cari barang..." 
+                        class="w-full bg-white border border-gray-200 rounded-full py-2 pl-4 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-main">
+                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-400">
+                        <i class="fa-solid fa-magnifying-glass"></i>
                     </div>
-                    <input type="text" id="captchaInput" required placeholder="Masukkan kode CAPTCHA di atas" 
-                           class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-gray-700 uppercase" autocomplete="off">
-                    <p class="text-xs text-error mt-1 hidden" id="captchaError">CAPTCHA tidak sesuai.</p>
                 </div>
+            </div>
+        </nav>
 
-                <!-- Lupa Password Link -->
-                <div class="flex justify-end mb-6">
-                    <button type="button" onclick="switchView('forgot')" class="text-sm text-primary hover:text-primaryDark font-medium transition-colors">
-                        Lupa Password?
+        <!-- Main Content Wrapper -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+            <!-- Banner Promo -->
+            <section class="bg-gradient-to-r from-main via-dark to-darker rounded-3xl p-8 md:p-12 text-white shadow-xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between">
+                <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+                <div class="space-y-4 max-w-xl z-10 text-center md:text-left">
+                    <span class="bg-white/20 text-light text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider backdrop-blur-sm">PROMO SPESIAL HARI INI</span>
+                    <h2 class="text-3xl md:text-5xl font-extrabold tracking-tight">BELANJA SEKARANG, HARGA MAKIN SAYANG!</h2>
+                    <p class="text-light text-sm md:text-base">Nikmati berbagai promo menarik hanya di BELANJADULU. Diskon fantastis untuk semua kategori barang kebutuhanmu.</p>
+                    <div class="pt-2">
+                        <span class="inline-block bg-yellow-400 text-darker font-bold text-sm px-4 py-2 rounded-xl shadow-md">DISKON HINGGA 50%</span>
+                    </div>
+                </div>
+                <div class="mt-8 md:mt-0 z-10">
+                    <button onclick="scrollToProducts()" class="bg-white text-main hover:bg-light font-bold px-8 py-4 rounded-2xl shadow-lg transform transition active:scale-95 flex items-center space-x-2">
+                        <span>BELANJA SEKARANG</span>
+                        <i class="fa-solid fa-arrow-right"></i>
                     </button>
                 </div>
+            </section>
 
-                <!-- Tombol Masuk -->
-                <button type="submit" class="w-full bg-primary hover:bg-primaryDark text-white font-semibold py-3 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
-                    <span>MASUK</span>
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                    </svg>
+            <!-- Kategori Pilihan -->
+            <section class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-bold text-gray-900">Kategori Pilihan</h3>
+                    <a href="#" class="text-main hover:text-dark text-sm font-semibold transition">Lihat Semua</a>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4" id="categoryContainer">
+                    <!-- Kategori di-generate lewat script -->
+                </div>
+            </section>
+
+            <!-- Produk Section -->
+            <section id="productSection" class="space-y-6">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-bold text-gray-900">Produk Pilihan Terbaik</h3>
+                    <span class="text-sm text-gray-500">Menampilkan produk berkualitas tinggi</span>
+                </div>
+                <!-- Daftar Produk Grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" id="productContainer">
+                    <!-- Produk di-generate lewat script -->
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-white border-t border-gray-200 mt-20 py-8 text-center text-sm text-gray-500">
+            <p>&copy; 2026 BELANJADULU. Seluruh hak cipta dilindungi undang-undang.</p>
+        </footer>
+    </div>
+
+    <div id="cartDrawer" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex justify-end transition-opacity duration-300">
+        <div class="bg-white w-full max-w-md h-full shadow-2xl flex flex-col transform translate-x-full transition-transform duration-300" id="cartDrawerContent">
+            <div class="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-cart-shopping text-main"></i>
+                    <h3 class="font-bold text-lg text-gray-900">Keranjang Belanja</h3>
+                </div>
+                <button onclick="toggleCartDrawer()" class="p-2 text-gray-400 hover:text-gray-600 rounded-lg">
+                    <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
-            </form>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-4 space-y-4" id="cartItemsContainer">
+                <!-- Item Keranjang di-generate lewat script -->
+            </div>
 
-            <!-- Link Daftar -->
-            <div class="mt-6 text-center text-sm text-gray-600">
-                Belum punya akun? 
-                <button type="button" onclick="switchView('register')" class="text-primary hover:text-primaryDark font-semibold transition-colors">
-                    Daftar
+            <div class="p-4 border-t border-gray-100 bg-gray-50 space-y-3">
+                <div class="flex justify-between items-center text-sm">
+                    <span class="text-gray-500">Total Harga:</span>
+                    <span id="cartTotalPrice" class="font-bold text-xl text-main">Rp0</span>
+                </div>
+                <button onclick="checkout()" class="w-full bg-main hover:bg-dark text-white font-bold py-3 rounded-xl shadow transition duration-200 flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-bag-shopping"></i>
+                    <span>Checkout Sekarang</span>
                 </button>
             </div>
         </div>
-
-        <!-- VIEW: DAFTAR (Mockup) -->
-        <div id="registerView" class="view-hidden relative z-10 animate-fade-in">
-            <form id="registerForm" onsubmit="event.preventDefault(); showMessage('Fitur pendaftaran sedang dalam pengembangan.', 'success'); switchView('login');">
-                <div class="mb-4">
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Lengkap</label>
-                    <input type="text" required placeholder="Nama sesuai KTP" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:border-primary">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">NISN / NIK</label>
-                    <input type="text" required placeholder="Nomor Induk" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:border-primary">
-                </div>
-                <div class="mb-6">
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Password Baru</label>
-                    <input type="password" required placeholder="Buat password" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:border-primary">
-                </div>
-                <button type="submit" class="w-full bg-primary hover:bg-primaryDark text-white font-semibold py-3 px-4 rounded-lg shadow-md transition-all">
-                    BUAT AKUN
-                </button>
-            </form>
-            <div class="mt-6 text-center text-sm">
-                <button type="button" onclick="switchView('login')" class="text-gray-500 hover:text-gray-800 font-medium transition-colors flex items-center justify-center w-full gap-1">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-                    Kembali ke Login
-                </button>
-            </div>
-        </div>
-
-        <!-- VIEW: LUPA PASSWORD (Mockup) -->
-        <div id="forgotView" class="view-hidden relative z-10 animate-fade-in">
-            <p class="text-sm text-gray-600 mb-6 text-center">Masukkan NISN / NIK Anda. Kami akan memandu langkah pemulihan sandi selanjutnya.</p>
-            <form id="forgotForm" onsubmit="event.preventDefault(); showMessage('Instruksi pemulihan telah dikirim (Simulasi).', 'success'); switchView('login');">
-                <div class="mb-6">
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">NISN / NIK</label>
-                    <input type="text" required placeholder="Masukkan NISN / NIK Anda" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:border-primary">
-                </div>
-                <button type="submit" class="w-full bg-primary hover:bg-primaryDark text-white font-semibold py-3 px-4 rounded-lg shadow-md transition-all">
-                    PULIHKAN PASSWORD
-                </button>
-            </form>
-            <div class="mt-6 text-center text-sm">
-                <button type="button" onclick="switchView('login')" class="text-gray-500 hover:text-gray-800 font-medium transition-colors flex items-center justify-center w-full gap-1">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-                    Kembali ke Login
-                </button>
-            </div>
-        </div>
-
     </div>
 
     <script>
-        // === STATE & REFERENSI DOM ===
-        let currentCaptchaText = "";
-        let notifTimeout;
+        // Data Login Sesuai Permintaan
+        const VALID_NIS = "25000016";
+        const VALID_PASS = "123456";
+        let currentCaptcha = "";
 
-        // Elemen DOM
-        const loginForm = document.getElementById('loginForm');
-        const nikInput = document.getElementById('nikInput');
-        const passwordInput = document.getElementById('passwordInput');
-        const captchaInput = document.getElementById('captchaInput');
-        const togglePasswordBtn = document.getElementById('togglePassword');
-        const eyeIcon = document.getElementById('eyeIcon');
-        const refreshCaptchaBtn = document.getElementById('refreshCaptchaBtn');
-        const canvas = document.getElementById('captchaCanvas');
-        const ctx = canvas.getContext('2d');
-        const subtitleText = document.getElementById('subtitleText');
-
-        // Elemen View
-        const loginView = document.getElementById('loginView');
-        const registerView = document.getElementById('registerView');
-        const forgotView = document.getElementById('forgotView');
-
-        // === FUNGSI NAVIGASI VIEW ===
-        function switchView(viewName) {
-            // Sembunyikan semua
-            loginView.classList.add('view-hidden');
-            registerView.classList.add('view-hidden');
-            forgotView.classList.add('view-hidden');
-            
-            // Reset input (opsional, agar form bersih saat ganti view)
-            loginForm.reset();
-            resetErrors();
-            generateCaptcha();
-
-            // Tampilkan yang dipilih
-            if (viewName === 'login') {
-                loginView.classList.remove('view-hidden');
-                subtitleText.innerText = "Silakan masuk ke akun Anda";
-            } else if (viewName === 'register') {
-                registerView.classList.remove('view-hidden');
-                subtitleText.innerText = "Buat akun baru BelanjaDulu";
-            } else if (viewName === 'forgot') {
-                forgotView.classList.remove('view-hidden');
-                subtitleText.innerText = "Pemulihan Password";
+        // Data Produk dengan Gambar Realistis Marketplace
+        const products = [
+            {
+                id: 1,
+                name: "Hoodie Premium",
+                price: 149000,
+                originalPrice: 186250,
+                discount: "20%",
+                rating: 4.8,
+                category: "Fashion",
+                image: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=600&q=80"
+            },
+            {
+                id: 2,
+                name: "Sneakers Casual",
+                price: 299000,
+                originalPrice: 351760,
+                discount: "15%",
+                rating: 4.9,
+                category: "Sepatu",
+                image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=600&q=80"
+            },
+            {
+                id: 3,
+                name: "Tas Backpack",
+                price: 179000,
+                originalPrice: 238660,
+                discount: "25%",
+                rating: 4.7,
+                category: "Tas",
+                image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=600&q=80"
+            },
+            {
+                id: 4,
+                name: "Headphone Wireless",
+                price: 249000,
+                originalPrice: 355710,
+                discount: "30%",
+                rating: 4.6,
+                category: "Elektronik",
+                image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80"
+            },
+            {
+                id: 5,
+                name: "Jam Digital",
+                price: 129000,
+                originalPrice: 143330,
+                discount: "10%",
+                rating: 4.5,
+                category: "Aksesoris",
+                image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80"
+            },
+            {
+                id: 6,
+                name: "Kaos Oversize",
+                price: 89000,
+                originalPrice: 111250,
+                discount: "20%",
+                rating: 4.7,
+                category: "Fashion",
+                image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=600&q=80"
+            },
+            {
+                id: 7,
+                name: "Tumbler Stainless",
+                price: 79000,
+                originalPrice: 92940,
+                discount: "15%",
+                rating: 4.8,
+                category: "Rumah",
+                image: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&w=600&q=80"
+            },
+            {
+                id: 8,
+                name: "Lampu LED",
+                price: 59000,
+                originalPrice: 78660,
+                discount: "25%",
+                rating: 4.4,
+                category: "Rumah",
+                image: "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?auto=format&fit=crop&w=600&q=80"
             }
-        }
+        ];
 
-        // === FUNGSI NOTIFIKASI KUSTOM ===
-        function showMessage(message, type) {
-            const notifBox = document.getElementById('notificationBox');
-            const notifMessage = document.getElementById('notifMessage');
-            const notifIcon = document.getElementById('notifIcon');
-            
-            // Hapus class warna sebelumnya
-            notifBox.classList.remove('bg-primaryDark', 'bg-error', 'animate-slide-down');
-            
-            if (type === 'success') {
-                notifBox.classList.add('bg-primaryDark');
-                notifIcon.innerHTML = `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>`;
-            } else {
-                notifBox.classList.add('bg-error');
-                notifIcon.innerHTML = `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
-            }
+        // Data Kategori
+        const categories = [
+            { name: "Fashion", icon: "fa-shirt" },
+            { name: "Sepatu", icon: "fa-shoe-prints" },
+            { name: "Tas", icon: "fa-backpack" },
+            { name: "Elektronik", icon: "fa-mobile-screen" },
+            { name: "Aksesoris", icon: "fa-headphones" },
+            { name: "Rumah", icon: "fa-house" },
+            { name: "Makanan", icon: "fa-burger" },
+            { name: "Buku", icon: "fa-book" }
+        ];
 
-            notifMessage.innerText = message;
-            
-            // Tampilkan animasi
-            notifBox.classList.remove('view-hidden');
-            // Memicu reflow agar animasi dapat diulang
-            void notifBox.offsetWidth; 
-            notifBox.classList.add('animate-slide-down');
+        let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-            // Auto hide setelah 3.5 detik
-            clearTimeout(notifTimeout);
-            notifTimeout = setTimeout(() => {
-                notifBox.classList.add('view-hidden');
-            }, 3500);
-        }
-
-        // === TOGGLE PASSWORD ===
-        togglePasswordBtn.addEventListener('click', function() {
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                // Ikon Mata Terbuka (Melihat)
-                eyeIcon.innerHTML = `
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                `;
-            } else {
-                passwordInput.type = 'password';
-                // Ikon Mata Tertutup (Hidden)
-                eyeIcon.innerHTML = `
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                `;
-            }
-        });
-
-        // === GENERATOR CAPTCHA ===
+        // Fungsi CAPTCHA
         function generateCaptcha() {
-            // Karakter yang digunakan (menghindari O, 0, I, 1 agar tidak membingungkan)
-            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-            currentCaptchaText = '';
+            const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+            let captcha = "";
             for (let i = 0; i < 5; i++) {
-                currentCaptchaText += chars.charAt(Math.floor(Math.random() * chars.length));
+                captcha += chars.charAt(Math.floor(Math.random() * chars.length));
             }
-
-            // Membersihkan canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Latar belakang dengan sedikit noise
-            ctx.fillStyle = '#f3f4f6';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Tambahkan garis acak (Noise)
-            for (let i = 0; i < 5; i++) {
-                ctx.beginPath();
-                ctx.moveTo(Math.random() * canvas.width, Math.random() * canvas.height);
-                ctx.lineTo(Math.random() * canvas.width, Math.random() * canvas.height);
-                ctx.strokeStyle = `rgba(16, 185, 129, ${Math.random() * 0.5})`; // Warna hijau transparan
-                ctx.lineWidth = Math.random() * 2;
-                ctx.stroke();
-            }
-
-            // Menggambar teks CAPTCHA dengan efek rotasi sedikit
-            ctx.font = 'bold 22px Poppins, sans-serif';
-            ctx.textBaseline = 'middle';
-            
-            for (let i = 0; i < currentCaptchaText.length; i++) {
-                ctx.save();
-                const x = 15 + (i * 20);
-                const y = canvas.height / 2 + (Math.random() * 4 - 2); // Naik turun sedikit
-                const rot = (Math.random() - 0.5) * 0.4; // Rotasi acak
-                
-                ctx.translate(x, y);
-                ctx.rotate(rot);
-                ctx.fillStyle = '#047857'; // Warna teks hijau tua
-                ctx.fillText(currentCaptchaText[i], 0, 0);
-                ctx.restore();
-            }
-            
-            // Kosongkan input setiap kali refresh
-            captchaInput.value = '';
+            currentCaptcha = captcha;
+            document.getElementById('captchaDisplay').innerText = captcha;
+            document.getElementById('captchaInput').value = "";
         }
 
-        // Listener Tombol Refresh CAPTCHA
-        refreshCaptchaBtn.addEventListener('click', generateCaptcha);
-
-        // === VALIDASI & ERROR HANDLING ===
-        function showError(inputId, errorId, message) {
-            const inputEl = document.getElementById(inputId);
-            const errorEl = document.getElementById(errorId);
-            inputEl.classList.add('input-error');
-            errorEl.innerText = message;
-            errorEl.classList.remove('hidden');
-        }
-
-        function resetErrors() {
-            const inputs = ['nikInput', 'passwordInput', 'captchaInput'];
-            const errors = ['nikError', 'passwordError', 'captchaError'];
-            
-            inputs.forEach(id => {
-                document.getElementById(id).classList.remove('input-error');
-            });
-            errors.forEach(id => {
-                document.getElementById(id).classList.add('hidden');
-            });
-        }
-
-        // Event Submit Login
-        loginForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            resetErrors();
-            
-            let isValid = true;
-            
-            // Ambil value
-            const nik = nikInput.value.trim();
-            const password = passwordInput.value;
-            const captcha = captchaInput.value.trim().toUpperCase();
-
-            // Validasi NIK
-            if (!nik) {
-                showError('nikInput', 'nikError', 'NISN / NIK tidak boleh kosong.');
-                isValid = false;
-            } else if (nik.length < 5) {
-                showError('nikInput', 'nikError', 'NISN / NIK tidak valid.');
-                isValid = false;
-            }
-
-            // Validasi Password
-            if (!password) {
-                showError('passwordInput', 'passwordError', 'Password tidak boleh kosong.');
-                isValid = false;
-            }
-
-            // Validasi CAPTCHA
-            if (!captcha) {
-                showError('captchaInput', 'captchaError', 'Masukkan kode CAPTCHA.');
-                isValid = false;
-            } else if (captcha !== currentCaptchaText) {
-                showError('captchaInput', 'captchaError', 'Kode CAPTCHA salah, coba lagi.');
-                isValid = false;
-                generateCaptcha(); // Buat baru jika salah
-            }
-
-            // Jika semua valid
-            if (isValid) {
-                // Tampilkan notifikasi sukses (simulasi proses login)
-                showMessage('Login berhasil! Mengalihkan halaman...', 'success');
-                
-                // Menonaktifkan tombol sementara
-                const btn = loginForm.querySelector('button[type="submit"]');
-                const originalText = btn.innerHTML;
-                btn.innerHTML = `<svg class="animate-spin h-5 w-5 mr-2 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Memproses...`;
-                btn.disabled = true;
-
-                // Simulasi redirect
-                setTimeout(() => {
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                    // window.location.href = '/dashboard'; // Diaktifkan pada implementasi nyata
-                }, 2000);
+        // Toggle Password Visibility
+        function togglePassword() {
+            const passInput = document.getElementById('passwordInput');
+            const eyeIcon = document.getElementById('eyeIcon');
+            if (passInput.type === "password") {
+                passInput.type = "text";
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.add('fa-eye-slash');
             } else {
-                showMessage('Harap periksa kembali isian Anda.', 'error');
+                passInput.type = "password";
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye');
             }
+        }
+
+        // Custom Modal Notifikasi
+        const modal = document.getElementById('messageModal');
+        const modalContent = document.getElementById('messageModalContent');
+        
+        function showMessage(title, message, type) {
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalText').innerText = message;
+            
+            const iconContainer = document.getElementById('modalIcon');
+            if(type === 'success') {
+                iconContainer.className = "mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-light text-main mb-4";
+                iconContainer.innerHTML = '<i class="fa-solid fa-check text-xl"></i>';
+            } else {
+                iconContainer.className = "mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 text-red-600 mb-4";
+                iconContainer.innerHTML = '<i class="fa-solid fa-xmark text-xl"></i>';
+            }
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modalContent.classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeModal() {
+            modal.classList.add('opacity-0');
+            modalContent.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300);
+        }
+
+        // Event Form Login
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const inputNis = document.getElementById('nisInput').value.trim();
+            const inputPass = document.getElementById('passwordInput').value;
+            const inputCaptcha = document.getElementById('captchaInput').value.toUpperCase().trim();
+
+            if (inputCaptcha !== currentCaptcha) {
+                showMessage("Login Gagal", "Kode CAPTCHA salah!", "error");
+                generateCaptcha();
+                return;
+            }
+            if (inputNis !== VALID_NIS) {
+                showMessage("Login Gagal", "NIS tidak ditemukan!", "error");
+                generateCaptcha();
+                return;
+            }
+            if (inputPass !== VALID_PASS) {
+                showMessage("Login Gagal", "Password salah!", "error");
+                generateCaptcha();
+                return;
+            }
+
+            localStorage.setItem("isLoggedIn", "true");
+            showMessage("Berhasil", "Login berhasil! Selamat datang di BELANJADULU.", "success");
+            
+            setTimeout(() => {
+                checkAuth();
+            }, 1200);
         });
 
-        // === INITIALIZATION ===
-        window.onload = function() {
-            generateCaptcha();
-        };
+        // Cek Autentikasi dan Render Halaman
+        function checkAuth() {
+            if (localStorage.getItem("isLoggedIn") === "true") {
+                document.getElementById('loginView').classList.add('hidden');
+                document.getElementById('shopView').classList.remove('hidden');
+                renderCategories();
+                renderProducts(products);
+                updateCartBadge();
+            } else {
+                document.getElementById('shopView').classList.add('hidden');
+                document.getElementById('loginView').classList.remove('hidden');
+                generateCaptcha();
+            }
+        }
 
+        // Logout
+        function logout() {
+            // Menggunakan modal pengganti confirm bawaan
+            document.getElementById('modalTitle').innerText = "Konfirmasi Keluar";
+            document.getElementById('modalText').innerText = "Apakah Anda yakin ingin keluar dari BELANJADULU?";
+            const iconContainer = document.getElementById('modalIcon');
+            iconContainer.className = "mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 text-yellow-600 mb-4";
+            iconContainer.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-xl"></i>';
+
+            // Override tombol mengerti di modal untuk fungsi konfirmasi logout
+            const btn = modalContent.querySelector('button');
+            btn.onclick = function() {
+                localStorage.removeItem("isLoggedIn");
+                closeModal();
+                checkAuth();
+                // kembalikan tombol ke default
+                setTimeout(() => { btn.onclick = closeModal; }, 300);
+            };
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modalContent.classList.remove('scale-95');
+            }, 10);
+        }
+
+        // Render Kategori
+        function renderCategories() {
+            const container = document.getElementById('categoryContainer');
+            container.innerHTML = categories.map(cat => `
+                <div class="bg-white p-4 rounded-2xl shadow-sm hover:shadow-md transition text-center border border-gray-100 cursor-pointer group">
+                    <div class="w-12 h-12 mx-auto bg-light rounded-full flex items-center justify-center text-main group-hover:bg-main group-hover:text-white transition mb-2">
+                        <i class="fa-solid ${cat.icon} text-lg"></i>
+                    </div>
+                    <span class="text-xs font-semibold text-gray-700">${cat.name}</span>
+                </div>
+            `).join('');
+        }
+
+        // Render Produk dengan Gambar Realistis
+        function renderProducts(items) {
+            const container = document.getElementById('productContainer');
+            if (items.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center py-10 text-gray-400">Tidak ada produk yang ditemukan.</div>`;
+                return;
+            }
+
+            container.innerHTML = items.map(p => `
+                <div class="product-card bg-white rounded-2xl shadow-sm hover:shadow-lg transition overflow-hidden border border-gray-100 flex flex-col">
+                    <div class="relative w-full h-48 bg-gray-100 overflow-hidden">
+                        <img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover">
+                        <span class="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-lg shadow">
+                            Disc ${p.discount}
+                        </span>
+                    </div>
+                    <div class="p-4 flex-1 flex flex-col justify-between space-y-3">
+                        <div>
+                            <span class="text-xs text-gray-400 font-medium">${p.category}</span>
+                            <h4 class="font-bold text-gray-800 text-base line-clamp-1">${p.name}</h4>
+                            <div class="flex items-center space-x-1 text-yellow-400 text-xs mt-1">
+                                <i class="fa-solid fa-star"></i>
+                                <span class="font-semibold text-gray-700">${p.rating}</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex items-baseline space-x-2">
+                                <span class="font-extrabold text-main text-base">Rp${p.price.toLocaleString('id-ID')}</span>
+                                <span class="text-xs text-gray-400 line-through">Rp${p.originalPrice.toLocaleString('id-ID')}</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 mt-3">
+                                <button onclick="addToCart(${p.id})" class="bg-light text-main hover:bg-main hover:text-white font-semibold py-2 px-2 rounded-xl text-xs transition flex items-center justify-center space-x-1">
+                                    <i class="fa-solid fa-cart-plus"></i>
+                                    <span>+ Keranjang</span>
+                                </button>
+                                <button onclick="buyNow(${p.id})" class="bg-main hover:bg-dark text-white font-semibold py-2 px-2 rounded-xl text-xs transition">
+                                    Beli
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Pencarian Produk
+        function handleSearch(query) {
+            const keyword = query.toLowerCase();
+            const filtered = products.filter(p => p.name.toLowerCase().includes(keyword) || p.category.toLowerCase().includes(keyword));
+            renderProducts(filtered);
+        }
+
+        // Keranjang Belanja Logic
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            const existing = cart.find(item => item.id === productId);
+
+            if (existing) {
+                existing.qty += 1;
+            } else {
+                cart.push({ ...product, qty: 1 });
+            }
+
+            saveCart();
+            updateCartBadge();
+            showMessage("Berhasil", `${product.name} ditambahkan ke keranjang.`, "success");
+        }
+
+        function updateCartBadge() {
+            const badge = document.getElementById('cartBadge');
+            const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
+            if (totalCount > 0) {
+                badge.innerText = totalCount;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        function saveCart() {
+            localStorage.setItem("cart", JSON.stringify(cart));
+        }
+
+        function toggleCartDrawer() {
+            const drawer = document.getElementById('cartDrawer');
+            const content = document.getElementById('cartDrawerContent');
+            if (drawer.classList.contains('hidden')) {
+                renderCartItems();
+                drawer.classList.remove('hidden');
+                setTimeout(() => {
+                    content.classList.remove('translate-x-full');
+                }, 10);
+            } else {
+                content.classList.add('translate-x-full');
+                setTimeout(() => {
+                    drawer.classList.add('hidden');
+                }, 300);
+            }
+        }
+
+        function renderCartItems() {
+            const container = document.getElementById('cartItemsContainer');
+            if (cart.length === 0) {
+                container.innerHTML = `<div class="text-center py-20 text-gray-400"><i class="fa-solid fa-cart-shopping text-4xl mb-3"></i><p>Keranjang kamu masih kosong</p></div>`;
+                document.getElementById('cartTotalPrice').innerText = "Rp0";
+                return;
+            }
+
+            let totalPrice = 0;
+            container.innerHTML = cart.map(item => {
+                totalPrice += item.price * item.qty;
+                return `
+                    <div class="flex items-center space-x-3 bg-gray-50 p-3 rounded-2xl border border-gray-100">
+                        <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-cover rounded-xl">
+                        <div class="flex-1">
+                            <h5 class="font-bold text-sm text-gray-800 line-clamp-1">${item.name}</h5>
+                            <span class="text-xs font-semibold text-main">Rp${item.price.toLocaleString('id-ID')}</span>
+                            <div class="flex items-center space-x-2 mt-2">
+                                <button onclick="updateQty(${item.id}, -1)" class="w-6 h-6 bg-white border rounded-lg flex items-center justify-center text-gray-600 hover:bg-gray-100">-</button>
+                                <span class="text-xs font-bold">${item.qty}</span>
+                                <button onclick="updateQty(${item.id}, 1)" class="w-6 h-6 bg-white border rounded-lg flex items-center justify-center text-gray-600 hover:bg-gray-100">+</button>
+                            </div>
+                        </div>
+                        <button onclick="removeFromCart(${item.id})" class="text-red-400 hover:text-red-600 p-2">
+                            <i class="fa-solid fa-trash text-sm"></i>
+                        </button>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('cartTotalPrice').innerText = `Rp${totalPrice.toLocaleString('id-ID')}`;
+        }
+
+        function updateQty(productId, change) {
+            const item = cart.find(i => i.id === productId);
+            if (item) {
+                item.qty += change;
+                if (item.qty <= 0) {
+                    cart = cart.filter(i => i.id !== productId);
+                }
+                saveCart();
+                updateCartBadge();
+                renderCartItems();
+            }
+        }
+
+        function removeFromCart(productId) {
+            cart = cart.filter(i => i.id !== productId);
+            saveCart();
+            updateCartBadge();
+            renderCartItems();
+        }
+
+        function buyNow(productId) {
+            addToCart(productId);
+            toggleCartDrawer();
+        }
+
+        function checkout() {
+            if (cart.length === 0) {
+                showMessage("Keranjang Kosong", "Tambahkan produk terlebih dahulu sebelum checkout.", "error");
+                return;
+            }
+            showMessage("Checkout Berhasil", "Pesanan Anda berhasil dibuat dan sedang diproses!", "success");
+            cart = [];
+            saveCart();
+            updateCartBadge();
+            renderCartItems();
+            setTimeout(() => {
+                toggleCartDrawer();
+            }, 1500);
+        }
+
+        function scrollToProducts() {
+            document.getElementById('productSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Inisialisasi saat window dimuat
+        window.onload = function() {
+            checkAuth();
+        };
     </script>
 </body>
 </html>
